@@ -4,8 +4,8 @@
  * (Formerly known as External_Ad)
  *
  * REFERENCES:
- *	 Official Website: http://opensource.brightcove.com
- *	 Code Repository: http://code.google.com/p/brightcove/
+ *	 Website: http://opensource.brightcove.com
+ *	 Source: http://github.com/brightcoveosi/
  *
  * AUTHORS:
  *	 Jesse Streb, Professional Services Engineer, Brightcove
