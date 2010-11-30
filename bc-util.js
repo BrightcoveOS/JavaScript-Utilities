@@ -1,5 +1,5 @@
 /**
- * BC JS PAPI WRAPPER 2.0.0 (12 OCTOBER 2010)
+ * BC JS PAPI WRAPPER 2.0.0 (11 NOVEMBER 2010)
  * A Brightcove JavaScript Player API wrapper with utilities
  * (Formerly known as BCJS)
  *
@@ -53,6 +53,7 @@ var BCUtil = function () {
 		this.UI.init();
 		this.API = new BCUtil.API();
 		this.API.init();
+		this.EVENT = new BCUtil.EVENT();
 
 		this.$ = this.DOM.select;
 		this.$$ = this.DOM.hasMatch;
@@ -92,7 +93,7 @@ var BCUtil = function () {
 		var experienceScriptFound = false;
 		var modulesScriptFound = false;
 
-		for(var i = 0; i < pScripts.length; i++) {
+		for (var i = 0; i < pScripts.length; i++) {
 			if (pScripts[i].src == "http://admin.brightcove.com/js/BrightcoveExperiences.js") {
 				experienceScriptFound = true;
 			} else if (pScripts[i].src == "http://admin.brightcove.com/js/APIModules_all.js") {
@@ -103,22 +104,20 @@ var BCUtil = function () {
 		if (!experienceScriptFound) {
 			BCUtil.error("Experience script not found. Added by BCUtil.");
 
-			var pEl = document.createElement("script");
-			pEl.src = "http://admin.brightcove.com/js/BrightcoveExperiences.js";
-			pEl.type = "text/javascript";
-			document.getElementsByTagName("head")[0].appendChild(pEl);
+			var pEl_Experience = document.createElement("script");
+			pEl_Experience.src = "http://admin.brightcove.com/js/BrightcoveExperiences.js";
+			pEl_Experience.type = "text/javascript";
+			document.getElementsByTagName("head")[0].appendChild(pEl_Experience);
 		}
 
 		if (!modulesScriptFound) {
 			BCUtil.error("API Modules script not found. Added by BCUtil.");
 
-			var pEl = document.createElement("script");
-			pEl.src = "http://admin.brightcove.com/js/APIModules_all.js";
-			pEl.type = "text/javascript";
-			document.getElementsByTagName("head")[0].appendChild(pEl);
+			var pEl_Module = document.createElement("script");
+			pEl_Module.src = "http://admin.brightcove.com/js/APIModules_all.js";
+			pEl_Module.type = "text/javascript";
+			document.getElementsByTagName("head")[0].appendChild(pEl_Module);
 		}
-
-		var matcherScriptFound = typeof NW == "undefined" ? false : true;
 
 		if (typeof NW == "undefined") {
 			BCUtil.error("NWMatcher script not found.");
@@ -215,10 +214,10 @@ var BCUtil = function () {
 		} else if (window.ActiveXObject) {
 			try {
 				httpRequest = new ActiveXObject("Msxml2.XMLHTTP");
-			} catch(e1) {
+			} catch (e1) {
 				try {
 					httpRequest = new ActiveXObject("Microsoft.XMLHTTP");
-				} catch(e2) {}
+				} catch (e2) {}
 			}
 		}
 
@@ -272,7 +271,7 @@ var BCUtil = function () {
 		var os;
 		var version;
 
-		var browser = new Array(
+		var browser = [
 			{string: navigator.userAgent, subString: "Chrome", identity: "Chrome"},
 			{string: navigator.userAgent, subString: "OmniWeb", versionSearch: "OmniWeb/", identity: "OmniWeb"},
 			{string: navigator.vendor, subString: "Apple", identity: "Safari", versionSearch: "version"},
@@ -285,16 +284,16 @@ var BCUtil = function () {
 			{string: navigator.userAgent, subString: "MSIE", identity: "Explorer", versionSearch: "MSIE"},
 			{string: navigator.userAgent, subString: "Gecko", identity: "Mozilla", versionSearch: "rv"},
 			{string: navigator.userAgent, subString: "Mozilla", identity: "Netscape", versionSearch: "Mozilla"}
-		);
+		];
 
-		var system = new Array(
+		var system = [
 			{string: navigator.platform, subString: "Win", identity: "windows"},
 			{string: navigator.platform, subString: "Mac", identity: "mac"},
 			{string: navigator.platform, subString: "Linux", identity: "linux"}
-		);
+		];
 
 		var g = function (d) {
-			for(var i = 0; i < d.length; i++) {
+			for (var i = 0; i < d.length; i++) {
 				var s = d[i].string;
 				var p = d[i].prop;
 
@@ -325,7 +324,7 @@ var BCUtil = function () {
 		browser = browser.toLowerCase();
 		os = g(system) || "unknown";
 
-		return new Array(os, browser, version);
+		return [os, browser, version];
 	};
 
 	/**
@@ -342,7 +341,7 @@ var BCUtil = function () {
 		if (typeof window.innerWidth != "undefined") {
 			win_width = window.innerWidth;
 			win_height = window.innerHeight;
-		} else if (typeof document.documentElement != "undefined" && typeof document.documentElement.clientWidth != "undefined" && document.documentElement.clientWidth != 0) {
+		} else if (typeof document.documentElement != "undefined" && typeof document.documentElement.clientWidth != "undefined" && document.documentElement.clientWidth !== 0) {
 			win_width = document.documentElement.clientWidth;
 			win_height = document.documentElement.clientHeight;
 		} else {
@@ -361,12 +360,23 @@ var BCUtil = function () {
 			scroll_height = document.documentElement.scrollTop;
 		}
 
-		if (typeof(win_width) == "undefined") { win_width = 0; }
-		if (typeof(win_height) == "undefined") { win_height = 0; }
-		if (typeof(scroll_width) == "undefined") { scroll_width = 0; }
-		if (typeof(scroll_height) == "undefined") { scroll_height = 0; }
+		if (typeof(win_width) == "undefined") {
+			win_width = 0;
+		}
+		
+		if (typeof(win_height) == "undefined") {
+			win_height = 0;
+		}
+		
+		if (typeof(scroll_width) == "undefined") {
+			scroll_width = 0;
+		}
+		
+		if (typeof(scroll_height) == "undefined") {
+			scroll_height = 0;
+		}
 
-		return new Array(win_width, win_height, scroll_width, scroll_height);
+		return [win_width, win_height, scroll_width, scroll_height];
 	};
 
 	/**
@@ -376,17 +386,17 @@ var BCUtil = function () {
 	 * @return array The number, and whether a number was originally in pixels
 	 */
 	this.getNum = function (pNum) {
-		var ret = "";
-		var bool = false;
+		var pRet = "";
+		var isPx = false;
 
 		if (pNum.indexOf("px") > -1) {
-			bool = true;
-			ret = parseInt(pNum.substring(0, pNum.indexOf("px")));
+			isPx = true;
+			pRet = parseInt(pNum.substring(0, pNum.indexOf("px")), 8);
 		} else {
-			ret = parseInt(pNum);
+			pRet = parseInt(pNum, 8);
 		}
 
-		return new Array(ret, bool);
+		return [pRet, isPx];
 	};
 
 	/**
@@ -396,7 +406,7 @@ var BCUtil = function () {
 	 * @return string A human-readable version of the timestamp
 	 */
 	this.time = function (pNum) {
-		pNum = new Number(pNum / 1000);
+		pNum = (pNum / 1000);
 		var h = Math.floor(pNum / 3600);
 		var m = Math.floor(pNum % 3600 / 60);
 		var s = Math.floor(pNum % 3600 % 60);
@@ -439,17 +449,19 @@ var BCUtil = function () {
 	 * @param object [pOptions] A list of cookie options to set
 	 */
 	this.setCookie = function (pName, pValue, pExpires, pOptions) {
+		var expires_date;
+		
 		if (pOptions === undefined) {
 			pOptions = {};
 		}
 
 		if (pExpires) {
-			var expires_date = new Date();
-			expires_date.setDate(expires_date.getDate() + pExpires)
+			expires_date = new Date();
+			expires_date.setDate(expires_date.getDate() + pExpires);
 		}
 
 		document.cookie = pName + "=" + escape(pValue) +
-			((pExpires) ? ";expires="+expires_date.toGMTString() : "") +
+			((pExpires) ? ";expires=" + expires_date.toGMTString() : "") +
 			((pOptions.path) ? ";path=" + pOptions.path : "") +
 			((pOptions.domain) ? ";domain=" + pOptions.domain : "") +
 			((pOptions.secure) ? ";secure" : "");
@@ -481,21 +493,19 @@ var BCUtil = function () {
 	this.base64 = function (pType, pString) {
 		var key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 		var keyRe = new RegExp("[^" + key + "=]", "g");
+		var len = pString.length;
+		var i = 0;
+		var padding, output, byte1, byte2, byte3, byte4, index1, index2, index3, index4, char1, char2, char3;
 
 		if (pType == "encode") {
-			var i = 0;
-			var output = "";
-			var len = pString.length;
-			var padding = 3 - (len % 3);
-
-			while(i < len) {
-				var byte1 = pString.charCodeAt(i++);
-				var byte2 = pString.charCodeAt(i++) || 0;
-				var byte3 = pString.charCodeAt(i++) || 0;
-				var index1 = byte1 >> 2;
-				var index2 = (byte1 & 3) << 4 | byte2 >> 4;
-				var index3 = (byte2 & 15) << 2 | byte3 >> 6;
-				var index4 = byte3 & 63;
+			while (i < len) {
+				byte1 = pString.charCodeAt(i++);
+				byte2 = pString.charCodeAt(i++) || 0;
+				byte3 = pString.charCodeAt(i++) || 0;
+				index1 = byte1 >> 2;
+				index2 = (byte1 & 3) << 4 | byte2 >> 4;
+				index3 = (byte2 & 15) << 2 | byte3 >> 6;
+				index4 = byte3 & 63;
 
 				output += key.charAt(index1) + key.charAt(index2) + key.charAt(index3) + key.charAt(index4);
 			}
@@ -508,19 +518,14 @@ var BCUtil = function () {
 		} else {
 			pString = pString.replace(keyRe, "");
 
-			var i = 0;
-			var output = "";
-			var len = pString.length;
-			var padding = len - pString.indexOf("=");
-
-			while(i < len) {
-				var byte1 = key.indexOf(pString.substr(i++, 1));
-				var byte2 = key.indexOf(pString.substr(i++, 1));
-				var byte3 = key.indexOf(pString.substr(i++, 1));
-				var byte4 = key.indexOf(pString.substr(i++, 1));
-				var char1 = byte1 << 2 | byte2 >> 4;
-				var char2 = ((byte2 & 15) << 4) | (byte3 >> 2);
-				var char3 = ((byte3 & 3) << 6) | byte4 & 63;
+			while (i < len) {
+				byte1 = key.indexOf(pString.substr(i++, 1));
+				byte2 = key.indexOf(pString.substr(i++, 1));
+				byte3 = key.indexOf(pString.substr(i++, 1));
+				byte4 = key.indexOf(pString.substr(i++, 1));
+				char1 = byte1 << 2 | byte2 >> 4;
+				char2 = ((byte2 & 15) << 4) | (byte3 >> 2);
+				char3 = ((byte3 & 3) << 6) | byte4 & 63;
 
 				output += String.fromCharCode(char1) + String.fromCharCode(char2) + String.fromCharCode(char3);
 			}
@@ -546,7 +551,7 @@ var BCUtil = function () {
 		var regex = new RegExp(regexS);
 		var results = regex.exec(window.location.href);
 
-		if (results == null) {
+		if (results === null) {
 			return "";
 		} else {
 			return results[1];
@@ -595,7 +600,7 @@ var BCUtil = function () {
 				}
 			}
 
-			if (pTime == 0 || typeof(pTime) != "number") {
+			if (pTime === 0 || typeof(pTime) != "number") {
 				pTime = 1;
 			}
 
@@ -622,6 +627,7 @@ var BCUtil = function () {
 			var pCurrentTime = new Date().getTime();
 			var pTimeRemaining = Math.max(0, pTimeEnd - pCurrentTime);
 			var pCurrentMove;
+			var isPx = true;
 
 			if (pType == "top" || pType == "right" || pType == "bottom" || pType == "left") {
 				pCurrentMove = Math.round((pValueDistance - (Math.pow(pTimeRemaining, 3) / Math.pow(pTime, 3)) * pValueDistance) * 10) / 10;
@@ -630,11 +636,11 @@ var BCUtil = function () {
 			}
 
 			if (pTimeRemaining <= 0 || pValueDistance > 10) {
-				pCurrentMove = parseInt(pCurrentMove);
+				pCurrentMove = parseInt(pCurrentMove, 8);
 			}
 
 			if (pType != "filter") {
-				var isPx = BCUtil.getNum(pEl.style[pType])[1];
+				isPx = BCUtil.getNum(pEl.style[pType])[1];
 			}
 
 			if (isPx) {
@@ -671,8 +677,8 @@ var BCUtil = function () {
 				pEl = BCUtil.DOM.select(pEl)[0];
 			}
 
-			if (pEl.style["display"] != "none" && pEl.style["display"] != "hidden") {
-				pEl.style["display"] = "none";
+			if (pEl.style.display != "none" && pEl.style.display != "hidden") {
+				pEl.style.display = "none";
 			}
 		};
 
@@ -686,8 +692,8 @@ var BCUtil = function () {
 				pEl = BCUtil.DOM.select(pEl)[0];
 			}
 
-			if (pEl.style["display"] == "none" || pEl.style["display"] == "hidden") {
-				pEl.style["display"] = "block";
+			if (pEl.style.display == "none" || pEl.style.display == "hidden") {
+				pEl.style.display = "block";
 			}
 		};
 
@@ -701,10 +707,10 @@ var BCUtil = function () {
 				pEl = BCUtil.DOM.select(pEl)[0];
 			}
 
-			if (pEl.style["display"] == "none" || pEl.style["display"] == "hidden") {
-				pEl.style["display"] = "block";
+			if (pEl.style.display == "none" || pEl.style.display == "hidden") {
+				pEl.style.display = "block";
 			} else {
-				pEl.style["display"] = "none";
+				pEl.style.display = "none";
 			}
 		};
 
@@ -721,27 +727,29 @@ var BCUtil = function () {
 
 			var elWidth;
 			var elHeight;
+			var newX;
+			var newY;
 
 			if (pEl.offsetWidth) {
 				elWidth = pEl.offsetWidth;
 			} else {
-				elWidth = BCUtil.getNum(pEl.style["width"])[0];
+				elWidth = BCUtil.getNum(pEl.style.width)[0];
 			}
 
 			if (pEl.offsetHeight) {
 				elHeight = pEl.offsetHeight;
 			} else {
-				elHeight = BCUtil.getNum(pEl.style["height"])[0];
+				elHeight = BCUtil.getNum(pEl.style.height)[0];
 			}
 
 			var win = BCUtil.dimensions();
 
 			if (pType == "fixed") {
-				var newX = ((win[0] / 2) - (elWidth / 2));
-				var newY = ((win[1] / 2) - (elHeight / 2));
+				newX = ((win[0] / 2) - (elWidth / 2));
+				newY = ((win[1] / 2) - (elHeight / 2));
 			} else {
-				var newX = ((win[0] / 2) - (elWidth / 2) + win[2]);
-				var newY = ((win[1] / 2) - (elHeight / 2) + win[3]);
+				newX = ((win[0] / 2) - (elWidth / 2) + win[2]);
+				newY = ((win[1] / 2) - (elHeight / 2) + win[3]);
 			}
 
 			if (newY < 0) {
@@ -752,8 +760,8 @@ var BCUtil = function () {
 				newX = 0;
 			}
 
-			pEl.style["left"] = newX + "px";
-			pEl.style["top"] = newY + "px";
+			pEl.style.left = newX + "px";
+			pEl.style.top = newY + "px";
 		};
 
 		/**
@@ -766,18 +774,18 @@ var BCUtil = function () {
 		this.accordion = function (pId, pClass, pSpeed) {
 			var pEls = BCUtil.DOM.select("." + pClass);
 
-			for(var i = 0; i < pEls.length; i++) {
+			for (var i = 0; i < pEls.length; i++) {
 				if (pEls[i].id == pId) {
 					BCUtil.UI.blind(pEls[i].id, pSpeed);
 				} else {
-					pContainer = BCUtil.DOM.select("#" + pEls[i].id + "_BCUtilC")[0];
+					var pContainer = BCUtil.DOM.select("#" + pEls[i].id + "_BCUtilC")[0];
 
 					if (pContainer) {
 						BCUtil.UI.blindClose(pContainer.id, pSpeed);
 					}
 				}
 			}
-		}
+		};
 
 		/**
 		 * Performs a blind on an element
@@ -789,7 +797,7 @@ var BCUtil = function () {
 			var pContainer = BCUtil.DOM.select("#" + pId + "_BCUtilC")[0];
 
 			if (BCUtil.DOM.select("#" + pId + "_BCUtilC")[0]) {
-				if (BCUtil.getNum(pContainer.style["height"])[0] > 0) {
+				if (BCUtil.getNum(pContainer.style.height)[0] > 0) {
 					BCUtil.UI.blindClose(pContainer.id, pSpeed);
 				} else {
 					var pEl = BCUtil.DOM.select("#" + pId)[0];
@@ -800,7 +808,7 @@ var BCUtil = function () {
 			} else {
 				BCUtil.UI.blindExecute(pId, pSpeed);
 			}
-		}
+		};
 
 		/**
 		 * Executes a blind tween
@@ -813,13 +821,13 @@ var BCUtil = function () {
 			var pParent = pOrigEl.parentNode;
 
 			var pNewEl = pOrigEl.cloneNode(true);
-			pNewEl.style["display"] = "block";
+			pNewEl.style.display = "block";
 
 			var pContainer = document.createElement("div");
 			pContainer.id = pId + "_BCUtilC";
-			pContainer.style["height"] = "0px";
-			pContainer.style["overflow"] = "hidden";
-			pContainer.style["position"] = "relative";
+			pContainer.style.height = "0px";
+			pContainer.style.overflow = "hidden";
+			pContainer.style.position = "relative";
 
 			pParent.insertBefore(pContainer, pOrigEl);
 			pParent.removeChild(pOrigEl);
@@ -829,12 +837,12 @@ var BCUtil = function () {
 
 			pNewEl = BCUtil.DOM.select("#" + pId)[0];
 			var finalHeight = pNewEl.offsetHeight;
-			pNewEl.style["width"] = pNewEl.offsetWidth + "px";
-			pNewEl.style["position"] = "absolute";
-			pNewEl.style["bottom"] = "0px";
+			pNewEl.style.width = pNewEl.offsetWidth + "px";
+			pNewEl.style.position = "absolute";
+			pNewEl.style.bottom = "0px";
 
 			BCUtil.UI.blindOpen(pContainer.id, finalHeight, pSpeed);
-		}
+		};
 
 		/**
 		 * Closes an element with a blind tween
@@ -849,7 +857,7 @@ var BCUtil = function () {
 				0,
 				pSpeed
 			);
-		}
+		};
 
 		/**
 		 * Opens an element with a blind tween
@@ -864,7 +872,7 @@ var BCUtil = function () {
 				pHeight,
 				pSpeed
 			);
-		}
+		};
 	};
 
 	this.DOM = function () {
@@ -1026,26 +1034,6 @@ var BCUtil = function () {
 		};
 
 		/**
-		 * Queues up functions for the onAdRulesReady method
-		 * @since 1.0.0
-		 * @param function [pFunc] The function to run
-		 */
-		this.adRulesReadyQueue = function (pFunc) {
-			if (typeof BCUtil.EXP.onAdRulesReady != "undefined") {
-				var oldOnAdRulesReady = BCUtil.EXP.onAdRulesReady;
-
-				BCUtil.EXP.onAdRulesReady = function (pEvent) {
-					oldOnAdRulesReady(pEvent);
-					pFunc(pEvent);
-				};
-			} else {
-				BCUtil.EXP.onAdRulesReady = function (pEvent) {
-					pFunc(pEvent);
-				};
-			}
-		};
-
-		/**
 		 * The event to run when onTemplatedLoaded is fired
 		 * @since 1.0.0
 		 * @param string [pId] The ID of the Brightcove player DOM element
@@ -1069,9 +1057,7 @@ var BCUtil = function () {
 			BCUtil.EXP.ad.addEventListener(BCAdvertisingEvent.AD_POSTROLLS_COMPLETE, BCUtil.EXP.onAdPostrollsComplete);
 			BCUtil.EXP.ad.addEventListener(BCAdvertisingEvent.AD_RULES_READY, BCUtil.EXP.onAdRulesReady);
 
-			if (typeof BCUtil_templateLoaded == "function") {
-				BCUtil_templateLoaded(pId);
-			}
+			BCUtil.EVENT.fire("TemplateLoaded");
 		};
 
 		/**
@@ -1083,58 +1069,80 @@ var BCUtil = function () {
 			BCUtil.EXP.player.addEventListener(BCMediaEvent.CHANGE, BCUtil.EXP.onMediaChange);
 			BCUtil.EXP.cue.addEventListener(BCCuePointEvent.CUE, BCUtil.EXP.onCuePoint);
 
-			if (typeof BCUtil_templateReady == "function") {
-				BCUtil_templateReady();
-			}
+			BCUtil.EVENT.fire("TemplateReady");
 		};
 
 		/**
-		 * The event to run when onContentLoaded is fired
+		 * Fires the ContentLoaded event
 		 * @since 1.0.0
 		 */
-		this.onContentLoaded = function () { if (typeof BCUtil_contentLoaded == "function") { BCUtil_contentLoaded(); } };
+		this.onContentLoaded = function () {
+			BCUtil.EVENT.fire("ContentLoaded");
+		};
 
 		/**
-		 * The event to run when onMediaComplete is fired
+		 * Fires the MediaComplete event
 		 * @since 1.0.0
 		 */
-		this.onMediaComplete = function () { if (typeof BCUtil_mediaComplete == "function") { BCUtil_mediaComplete(); } };
+		this.onMediaComplete = function () {
+			BCUtil.EVENT.fire("MediaComplete");
+		};
 
 		/**
-		 * The event to run when onMediaChange is fired
+		 * Fires the MediaChange event
 		 * @since 1.0.0
 		 */
-		this.onMediaChange = function () { if (typeof BCUtil_mediaChange == "function") { BCUtil_mediaChange(); } };
+		this.onMediaChange = function () {
+			BCUtil.EVENT.fire("MediaChange");
+		};
 
 		/**
-		 * The event to run when onCuePoint is fired
+		 * Fires the CuePoint event
 		 * @since 1.0.0
 		 */
-		this.onCuePoint = function (pData) { if (typeof BCUtil_cuePoint == "function") { BCUtil_cuePoint(pData); } };
+		this.onCuePoint = function (pData) {
+			BCUtil.EVENT.fire("CuePoint", pData);
+		};
 
 		/**
-		 * The event to run when onExternalAd is fired
+		 * Fires the ExternalAd event
 		 * @since 1.0.0
 		 */
-		this.onExternalAd = function (pData) { if (typeof BCUtil_externalAd == "function") { BCUtil_externalAd(pData); } };
+		this.onExternalAd = function (pData) {
+			BCUtil.EVENT.fire("ExternalAd", pData);
+		};
 
 		/**
-		 * The event to run when onAdStart is fired
+		 * Fires the AdRulesReady event
 		 * @since 1.0.0
 		 */
-		this.onAdStart = function () { if (typeof BCUtil_adStart == "function") { BCUtil_adStart(); } };
+		this.onAdRulesReady = function () {
+			BCUtil.EVENT.fire("AdRulesReady");
+		};
 
 		/**
-		 * The event to run when onAdComplete is fired
+		 * Fires the AdStart event
 		 * @since 1.0.0
 		 */
-		this.onAdComplete = function () { if (typeof BCUtil_adComplete == "function") { BCUtil_adComplete(); } };
+		this.onAdStart = function () {
+			BCUtil.EVENT.fire("AdStart");
+		};
 
 		/**
-		 * The event to run when onAdPostrollsComplete is fired
+		 * Fires the AdComplete event
 		 * @since 1.0.0
 		 */
-		this.onAdPostrollsComplete = function () { if (typeof BCUtil_adPostrollsComplete == "function") { BCUtil_adPostrollsComplete(); } };
+		this.onAdComplete = function () {
+			BCUtil.EVENT.fire("AdComplete");
+		};
+
+		/**
+		 * Fires the AdPostrollsComplete event
+		 * @since 1.0.0
+		 */
+		this.onAdPostrollsComplete = function () {
+			BCUtil.EVENT.fire("AdPostrollsComplete");
+		};
 	};
 
 	this.API = function () {
@@ -1147,24 +1155,24 @@ var BCUtil = function () {
 			this.callback = "BCUtil.API.flush";
 			this.url = "http://api.brightcove.com/services/library";
 			this.calls = [
-				{ "s":"find_all_videos", "o":false },
-				{ "s":"find_playlists_for_player_id", "o":"player_id" },
-				{ "s":"find_all_playlists", "o":false },
-				{ "s":"find_playlist_by_id", "o":"playlist_id" },
-				{ "s":"find_related_videos", "o":"video_id" },
-				{ "s":"find_video_by_id", "o":"video_id" },
-				{ "s":"find_videos_by_ids", "o":"video_ids" },
-				{ "s":"find_videos_by_tags", "o":"or_tags" },
-				{ "s":"find_video_by_reference_id", "o":"reference_id" },
-				{ "s":"find_video_by_reference_ids", "o":"reference_ids" },
-				{ "s":"find_videos_by_user_id", "o":"user_id" },
-				{ "s":"find_videos_by_campaign_id", "o":"campaign_id" },
-				{ "s":"find_videos_by_text", "o":"text" },
-				{ "s":"find_modified_videos", "o":"from_date" },
-				{ "s":"find_playlists_by_ids", "o":"playlist_ids" },
-				{ "s":"find_playlist_by_reference_id", "o":"reference_id" },
-				{ "s":"find_playlists_by_reference_ids", "o":"reference_ids" },
-				{ "s":"search_videos", "o":"all" }
+				{ "s" : "find_all_videos", "o": false },
+				{ "s" : "find_playlists_for_player_id", "o" : "player_id" },
+				{ "s" : "find_all_playlists", "o": false },
+				{ "s" : "find_playlist_by_id", "o" : "playlist_id" },
+				{ "s" : "find_related_videos", "o" : "video_id" },
+				{ "s" : "find_video_by_id", "o" : "video_id" },
+				{ "s" : "find_videos_by_ids", "o" : "video_ids" },
+				{ "s" : "find_videos_by_tags", "o" : "or_tags" },
+				{ "s" : "find_video_by_reference_id", "o" : "reference_id" },
+				{ "s" : "find_video_by_reference_ids", "o" : "reference_ids" },
+				{ "s" : "find_videos_by_user_id", "o" : "user_id" },
+				{ "s" : "find_videos_by_campaign_id", "o" : "campaign_id" },
+				{ "s" : "find_videos_by_text", "o" : "text" },
+				{ "s" : "find_modified_videos", "o" : "from_date" },
+				{ "s" : "find_playlists_by_ids", "o" : "playlist_ids" },
+				{ "s" : "find_playlist_by_reference_id", "o" : "reference_id" },
+				{ "s" : "find_playlists_by_reference_ids", "o" : "reference_ids" },
+				{ "s" : "search_videos", "o" : "all" }
 			];
 		};
 
@@ -1196,12 +1204,17 @@ var BCUtil = function () {
 			s = s.toLowerCase().replace(/(find_)|(_)|(get_)/g, "");
 
 			for (var z in BCUtil.API.calls) {
-				if (typeof BCUtil.API.calls[z].s == "undefined") { continue; }
+				if (typeof BCUtil.API.calls[z].s == "undefined") {
+					continue;
+				}
+				
 				if (s == BCUtil.API.calls[z].s.toLowerCase().replace(/(find_)|(_)|(get_)/g, "")) {
 					s = BCUtil.API.calls[z].s;
+					
 					if (typeof BCUtil.API.calls[z].o != "undefined") {
 						o = BCUtil.API.calls[z].o;
 					}
+					
 					break;
 				}
 			}
@@ -1218,7 +1231,6 @@ var BCUtil = function () {
 				}
 
 				if (typeof v.callback != "string") {
-
 					q += "&callback=" + BCUtil.API.callback;
 				}
 
@@ -1256,6 +1268,44 @@ var BCUtil = function () {
 		 */
 		this.flush = function (s) {
 			return true;
+		};
+	};
+	
+	this.EVENT = function () {
+		this.map = [];
+		
+		this.add = function (eName, fName) {
+			if (!this.check(eName)) {
+				this.map[eName] = [];
+			}
+	
+			this.map[eName].push(fName);
+		};
+	
+		this.remove = function (eName, fName) {
+			if (this.check(eName)) {
+				var pTemp = [];
+	
+				for (var i in this.map[eName]) {
+					if (this.map[eName][i] != fName) {
+						pTemp.push(this.map[eName][i]);
+					}
+				}
+	
+				this.map[eName] = pTemp;
+			}
+		};
+	
+		this.fire = function (eName, pData) {
+			if (this.check(eName)) {
+				for (var i in this.map[eName]) {
+					this.map[eName][i](pData);
+				}
+			}
+		};
+	
+		this.check = function (eName) {
+			return ((typeof this.map[eName] !== "undefined") && (this.map[eName].length > 0));
 		};
 	};
 };
