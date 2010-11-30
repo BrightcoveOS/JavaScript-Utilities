@@ -129,26 +129,70 @@ var BCUtil = function () {
 	 * Queues up functions for the window.onload() method
 	 * @since 1.0.0
 	 * @param function [pFunc] The function to run on window load
+	 * @author http://www.thefutureoftheweb.com/blog/adddomloadevent
 	 */
-	this.loadQueue = function (pFunc) {
-		if (typeof window.addEventListener != "undefined") {
-			window.addEventListener("load", pFunc, false);
-		} else if (typeof window.attachEvent != "undefined") {
-			window.attachEvent("onload", pFunc);
-		} else {
-			if (window.onload !== null) {
-				var oldOnload = window.onload;
-
-				window.onload = function (e) {
-					oldOnload(e);
-
-					window[pFunc]();
-				};
-			} else {
-				window.onload = pFunc;
+	this.loadQueue = (function () {
+		var pEvents = [],
+			pTimer,
+			pScript,
+			pDone,
+			pExecute,
+			pExistingFunction,
+			pInit = function () {
+				pDone = true;
+				clearInterval(pTimer);
+				while (pExecute = pEvents.shift()) {
+					pExecute();
+				}
+	
+				if (pScript) {
+					pScript.onreadystatechange = '';
+				}
+			};
+	
+		return function (func) {
+			if (pDone) {
+				return func();
 			}
+	
+			if (!pEvents[0]) {
+				if (document.addEventListener) {
+					document.addEventListener("DOMContentLoaded", pInit, false);
+				}
+	
+				/*@cc_on @*/
+				/*@if (@_win32)
+					document.write("<script id=__ie_onload defer src=//0><\/scr"+"ipt>");
+					pScript = document.getElementById("__ie_onload");
+					pScript.onreadystatechange = function () {
+						if (this.readyState == "complete") {
+							pInit();
+						}
+					};
+				/*@end @*/
+	
+				if (/WebKit/i.test(navigator.userAgent)) {
+					pTimer = setInterval(function () {
+						if (/loaded|complete/.test(document.readyState)) {
+							pInit();
+						}
+					}, 10);
+				}
+	
+				pExistingFunction = window.onload;
+				
+				window.onload = function() {
+					pInit();
+					
+					if (pExistingFunction) {
+						pExistingFunction();
+					}
+				};
+			}
+	
+			pEvents.push(func);
 		}
-	};
+	})();
 
 	/**
 	 * Makes an AJAX request
