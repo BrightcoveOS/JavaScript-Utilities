@@ -8,8 +8,8 @@
  *	 Source: http://github.com/brightcoveos/
  *
  * AUTHORS:
- *	 Jesse Streb, Professional Services Engineer, Brightcove
- *	 Brandon Aaskov, Professional Services Engineer, Brightcove
+ *	 Jesse Streb <jstreb@brightcove.com>
+ *	 Brandon Aaskov <baaskov@brightcove.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
  * software and associated documentation files (the "Software"), to deal in the Software
