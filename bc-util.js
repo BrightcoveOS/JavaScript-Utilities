@@ -662,7 +662,7 @@ var BCUtil = function () {
 				);
 			} else {
 				if (typeof(pCallback) == "function") {
-					pCallback();
+					pCallback(pEl);
 				}
 			}
 		};
