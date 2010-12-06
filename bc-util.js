@@ -391,9 +391,9 @@ var BCUtil = function () {
 
 		if (pNum.indexOf("px") > -1) {
 			isPx = true;
-			pRet = parseInt(pNum.substring(0, pNum.indexOf("px")), 8);
+			pRet = parseInt(pNum.substring(0, pNum.indexOf("px")), 10);
 		} else {
-			pRet = parseInt(pNum, 8);
+			pRet = parseInt(pNum, 10);
 		}
 
 		return [pRet, isPx];
@@ -636,7 +636,7 @@ var BCUtil = function () {
 			}
 
 			if (pTimeRemaining <= 0 || pValueDistance > 10) {
-				pCurrentMove = parseInt(pCurrentMove, 8);
+				pCurrentMove = parseInt(pCurrentMove, 10);
 			}
 
 			if (pType != "filter") {
