@@ -7,6 +7,14 @@
 </p>
 
 <h1>
+	Notes
+</h1>
+
+<p>
+	It is advised that before including this library on any production website you first compress and, if desired, combine the files.
+</p>
+
+<h1>
 	Download
 </h1>
 
