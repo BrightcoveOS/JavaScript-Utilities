@@ -1,11 +1,10 @@
 /**
- * BC JS PAPI WRAPPER 2.0.0 (7 DECEMBER 2010)
- * A Brightcove JavaScript Player API wrapper with utilities
+ * Brightcove JavaScript Utilities 2.0.0 (7 DECEMBER 2010)
  * (Formerly known as BCJS)
  *
  * REFERENCES:
  *	 Website: http://opensource.brightcove.com
- *	 Source: http://github.com/brightcoveos/
+ *	 Source: http://github.com/brightcoveos
  *
  * AUTHORS:
  *	 Matthew Congrove <mcongrove@brightcove.com>

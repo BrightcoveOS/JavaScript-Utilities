@@ -1,11 +1,10 @@
 /**
- * BC JS PAPI EXTERNAL AD LAYER 2.0.0 (12 OCTOBER 2010)
- * An external ad layer for the Brightcove JavaScript Player API wrapper
+ * Brightcove JavaScript Utilities External Ad Layer 2.0.0 (12 OCTOBER 2010)
  * (Formerly known as External_Ad)
  *
  * REFERENCES:
  *	 Website: http://opensource.brightcove.com
- *	 Source: http://github.com/brightcoveos/
+ *	 Source: http://github.com/brightcoveos
  *
  * AUTHORS:
  *	 Jesse Streb <jstreb@brightcove.com>
